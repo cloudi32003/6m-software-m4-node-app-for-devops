@@ -38,16 +38,16 @@ jobs:
           name: Log into Docker Hub
           command: |
             echo $DOCKER_TOKEN | docker login --username $DOCKER_USERNAME --password-stdin
-           # This logs in using the Personal Access Token
+           # Use Docker Token
       - run:
           name: Build Docker Image
           command: |
-            docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1 .  
+            docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest .  
            # Builds the image with the git SHA as the tag
       - run:
           name: Push Docker image to Docker Hub
           command: |
-            docker push $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1  
+            docker push $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest  
           # Push to Docker Hub 
 
 workflows:
