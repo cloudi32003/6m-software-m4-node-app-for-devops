@@ -25,7 +25,6 @@ jobs:
           echo "Running Tests"
           npm run test
 
-
 workflows:
   simple_workflow:
     jobs:
