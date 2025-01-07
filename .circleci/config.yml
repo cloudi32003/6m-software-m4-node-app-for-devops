@@ -21,9 +21,34 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run : |
+      - run: |
           echo "Running Tests"
           npm run test
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+        - run: |
+            echo "Install Dependencies"
+            npm install
+        - run:
+            name: Log into Docker Hub
+            command: |
+              echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+            # Use CircleCI environment variables to securely store Docker Hub credentials.
+        - run:
+            name: Build Docker Image
+            command: |
+              docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1 .  
+            # Builds the image with the git SHA as the tag
+        - run:
+            name: Push Docker image to Docker Hub
+            command: |
+              docker push $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_SHA1  
+            # Push to Docker Hub 
 
 workflows:
   simple_workflow:
