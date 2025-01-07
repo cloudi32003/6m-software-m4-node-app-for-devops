@@ -37,8 +37,8 @@ jobs:
       - run:
           name: Log into Docker Hub
           command: |
-            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-           # Use CircleCI environment variables to securely store Docker Hub credentials.
+            echo $DOCKER_TOKEN | docker login --username $DOCKER_USERNAME --password-stdin
+           # This logs in using the Personal Access Token
       - run:
           name: Build Docker Image
           command: |
