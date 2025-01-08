@@ -25,27 +25,21 @@ jobs:
       - run: |
           echo "Running Tests"
           npm run test
-  # publish:
-  #   docker:
-  #     - image: cimg/base:current
-  #   steps:
-  #     - checkout
-  #     - setup_remote_docker
-  #     - docker/check:
-  #         name: Log into Docker Hub
-  #         command: |
-  #           echo $DOCKER_TOKEN | docker login --username $DOCKER_USERNAME --password-stdin
-  #          # Use Docker Token
-  #     - docker/build:
-  #         name: Build Docker Image
-  #         image: $DOCKER_REGISTRY/my-node-app:latest
-  #     - docker/push:
-  #         name: Push Docker image to Docker Hub
-  #         command: |
-  #           docker push $DOCKER_REGISTRY/my-node-app:latest
-  #         # Push to Docker Hub
-  #     - run: |
-  #         echo "Building image"
+  publish:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Docker login
+          command: echo $DOCKER_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker/build:
+          image: cloudi32003/assignment5
+      - docker/push:
+          image: cloudi32003/assignment5
+      - run: |
+          echo "Building image"
 
 workflows:
   simple_workflow:
@@ -54,6 +48,10 @@ workflows:
       - test:
           requires:
             - build
-      # - publish:
-      #     requires:
-      #       - build
+      - publish:
+          context:
+            - build-env-vars
+            - docker-hub-creds
+          requires:
+            - build
+            - test
