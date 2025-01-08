@@ -1,0 +1,58 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.1
+  docker: circleci/docker@1.4.0
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo "Install dependencies"
+          npm install
+  test:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo "Running tests"
+          npm run test
+  publish:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Docker login
+          command: echo $DOCKER_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker/build:
+          image: cloudi32003/assignment5
+      - docker/push:
+          image: cloudi32003/assignment5
+      - run: |
+          echo "Building image"
+
+workflows:
+  simple_workflow:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - publish:
+          context:
+            - build-env-vars
+            - docker-hub-creds
+          requires:
+            - build
+            - test
+
