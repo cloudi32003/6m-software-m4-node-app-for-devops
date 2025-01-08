@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.0.1
+  docker: circleci/docker@1.4.0
 
 jobs:
   build:
@@ -24,37 +25,35 @@ jobs:
       - run: |
           echo "Running Tests"
           npm run test
-  build-and-push:
+  publish:
     docker:
-      - image: cimg/node:16.10
+      - image: cimg/base:current
     steps:
       - checkout
-      # - node/install-packages:
-      #     pkg-manager: npm
-      - run: |
-          echo "Install Dependencies"
-          npm install
-      - run:
+      - setup_remote_docker
+      - docker/check:
           name: Log into Docker Hub
           command: |
             echo $DOCKER_TOKEN | docker login --username $DOCKER_USERNAME --password-stdin
            # Use Docker Token
-      - run:
+      - docker/build:
           name: Build Docker Image
-          command: |
-            docker build -t $DOCKER_REGISTRY/my-node-app:latest .
-          # Change this to your Docker image name
-      - run:
+          image: $DOCKER_REGISTRY/my-node-app:latest
+      - docker/push:
           name: Push Docker image to Docker Hub
           command: |
             docker push $DOCKER_REGISTRY/my-node-app:latest
-          # Push to Docker Hub 
+          # Push to Docker Hub
+      - run: |
+          echo "Building image"
 
 workflows:
   simple_workflow:
     jobs:
-      # - build
+      - build
       # - test:
           # requires:
             # - build
-      - build-and-push
+      - publish:
+          requires:
+            - build
